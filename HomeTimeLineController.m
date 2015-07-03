@@ -18,6 +18,7 @@
 @interface HomeTimeLineController () <UITableViewDataSource, UITableViewDelegate, ComposeViewControllerDelegate>
 
 @property (nonatomic, strong) NSArray *tweets;
+@property (nonatomic, strong) UIRefreshControl *refreshControl;
 
 @end
 
@@ -30,6 +31,9 @@
     self.timeLineTableView.delegate = self;
     self.timeLineTableView.dataSource = self;
     
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    [self.refreshControl addTarget:self action:@selector(loadData) forControlEvents:UIControlEventValueChanged];
+    [self.timeLineTableView insertSubview:self.refreshControl atIndex:0];
 //    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Compose" style:UIBarButtonItemStylePlain target:self action:@selector(onComposeButton)];
     self.title = @"Tweet";
     
@@ -46,6 +50,7 @@
         if (tweets != nil) {
             self.tweets = tweets;
             [self.timeLineTableView reloadData];
+            [self.refreshControl endRefreshing];
         }
     }];
     NSLog(@"%@", self.tweets);
@@ -68,8 +73,9 @@
     cell.userName.text = [NSString stringWithFormat:@"@%@", tweet.user.name];
     cell.screenName.text = tweet.user.screenName;
     [cell.profileImage setImageWithURL:[NSURL URLWithString:tweet.user.profileImageUrl]];
-    int hours = floor([[NSDate date] timeIntervalSinceDate:tweet.createdAt] / 3600);
-    cell.createdAtHour.text = [NSString stringWithFormat:@"%dh", hours];
+//    int hours = floor([[NSDate date] timeIntervalSinceDate:tweet.createdAt] / 3600);
+//    cell.createdAtHour.text = [NSString stringWithFormat:@"%dh", hours];
+    cell.createdAtHour.text = tweet.interval;
     
     return cell;
 }

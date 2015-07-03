@@ -26,7 +26,7 @@
     self.screenName.text = self.tweet.user.screenName;
     self.name.text = [NSString stringWithFormat:@"@%@", self.tweet.user.name];
     self.retweetCount.text = [NSString stringWithFormat:@"%ld", self.tweet.RetweetsCount];
-    self.favoriateCount.text = [NSString stringWithFormat:@"%ld", self.tweet.favoritesCount];
+    self.favoriteCount.text = [NSString stringWithFormat:@"%ld", self.tweet.favoritesCount];
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     formatter.dateFormat = @"EEEE MM d HH:mm:ss y";
     
@@ -37,7 +37,7 @@
     }
     
     if (self.tweet.isFavorite) {
-        [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favoriate_on.png"] forState:UIControlStateNormal];
+        [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favorite_on.png"] forState:UIControlStateNormal];
     }
     
     
@@ -52,18 +52,44 @@
 }
 
 - (IBAction)onRetweet:(id)sender {
-        [[TwitterClient sharedInstance] retweet:self.tweet.id completion:^(Tweet *tweet, NSError *error) {
-            [self.btnRetweet setImage:[UIImage imageNamed:@"tweet_retweet_on.png"] forState:UIControlStateNormal];
+    
+    if (self.tweet.isRetweet) {
+        [[TwitterClient sharedInstance] deletTweete:self.tweet.id completion:^(Tweet *tweet, NSError *error) {
+            if ( tweet != nil) {
+                self.tweet.isRetweet = NO;
+                self.tweet.RetweetsCount--;
+                self.retweetCount.text = [NSString stringWithFormat:@"%ld", self.tweet.RetweetsCount];
+                [self.btnRetweet setImage:[UIImage imageNamed:@"tweet_retweet_off.png"] forState:UIControlStateNormal];
+                
+            }
         }];
+    } else {
+        [[TwitterClient sharedInstance] retweet:self.tweet.id completion:^(Tweet *tweet, NSError *error) {
+            if (tweet != nil) {
+                self.tweet.isRetweet = YES;
+                self.tweet.RetweetsCount++;
+                self.retweetCount.text = [NSString stringWithFormat:@"%ld", self.tweet.RetweetsCount];
+                [self.btnRetweet setImage:[UIImage imageNamed:@"tweet_retweet_on.png"] forState:UIControlStateNormal];
+            }
+        }];
+    }
 }
 
 - (IBAction)onFavoriate:(id)sender {
     if (self.tweet.isFavorite) {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            self.tweet.isFavorite = NO;
+//            self.tweet.favoritesCount --;
+//            self.favoriateCount.text = [NSString stringWithFormat:@"%ld", self.tweet.favoritesCount];
+//            [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favoriate_off.png"] forState:UIControlStateNormal];
+//        });
+//        
         [[TwitterClient sharedInstance] unfavorite:self.tweet.id completion:^(Tweet *tweet, NSError *error) {
             if (tweet != nil) {
                 self.tweet.isFavorite = NO;
                 self.tweet.favoritesCount--;
-                [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favoriate_off.png"] forState:UIControlStateNormal];
+                self.favoriteCount.text = [NSString stringWithFormat:@"%ld", self.tweet.favoritesCount];
+                [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favorite_off.png"] forState:UIControlStateNormal];
             }
         }];
     } else {
@@ -71,7 +97,8 @@
             if (tweet != nil) {
                 self.tweet.isFavorite = YES;
                 self.tweet.favoritesCount++;
-                [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favoriate_on.png"] forState:UIControlStateNormal];
+                self.favoriteCount.text = [NSString stringWithFormat:@"%ld", self.tweet.favoritesCount];
+                [self.btnFavoriate setImage:[UIImage imageNamed:@"tweet_favorite_on.png"] forState:UIControlStateNormal];
             }
         }];
     }

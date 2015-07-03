@@ -14,6 +14,7 @@
 @property (nonatomic, strong) NSString *id;
 @property (nonatomic, strong) NSString *text;
 @property (nonatomic, strong) NSDate *createdAt;
+@property (nonatomic, strong) NSString *interval;
 @property (nonatomic, strong) User *user;
 @property long favoritesCount;
 @property long RetweetsCount;
